@@ -21,10 +21,13 @@ export function LoginForm() {
 
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true);
+    console.log('📝 Form submitted with:', data.email);
     try {
       await signIn(data.email, data.password);
+      console.log('📝 SignIn completed successfully');
     } catch (error) {
-      // Error is handled in AuthContext
+      console.error('📝 SignIn failed:', error);
+      // Error is handled in AuthContext with toast
     } finally {
       setIsLoading(false);
     }

@@ -124,6 +124,8 @@ function AuthRedirect() {
     return <Navigate to="/login" replace />;
   }
   
+  console.log('🔄 User found, redirecting based on role:', role);
+  
   if (role === 'ADMIN') {
     console.log('🔄 Admin user, redirecting to dashboard');
     return <Navigate to="/dashboard" replace />;

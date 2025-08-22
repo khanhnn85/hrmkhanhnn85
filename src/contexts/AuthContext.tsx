@@ -56,6 +56,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     try {
+      console.log('🔐 Attempting login for:', email);
+      
       // Check if this is a demo user first
       const demoUsers = {
         'admin@company.com': {
@@ -87,23 +89,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const demoUser = demoUsers[email.toLowerCase() as keyof typeof demoUsers];
       
       if (demoUser) {
+        console.log('🔐 Demo user found:', demoUser.role);
         // Demo user login - accept any password
         setUser(demoUser);
         toast.success('Đăng nhập thành công!');
+        console.log('🔐 Demo user logged in successfully');
         
-        // Navigate based on role
-        setTimeout(() => {
-          if (demoUser.role === 'ADMIN') {
-            window.location.href = '/dashboard';
-          } else if (demoUser.role === 'HR') {
-            window.location.href = '/candidates';
-          } else if (demoUser.role === 'EMPLOYEE') {
-            window.location.href = '/employee';
-          }
-        }, 100);
         return;
       }
 
+      console.log('🔐 Not a demo user, checking database...');
+      
       // First try to find user in database
       const { data: userData, error: userError } = await supabase
         .from('users')
@@ -113,33 +109,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .single();
 
       if (userError || !userData) {
+        console.log('🔐 Database user not found:', userError);
         toast.error('Tài khoản không tồn tại hoặc đã bị vô hiệu hóa');
         throw new Error('User not found');
       }
 
+      console.log('🔐 Database user found:', userData.role);
       // For demo purposes, we'll accept any password for existing users
       // In production, you would verify the password hash
       setUser(userData);
       toast.success('Đăng nhập thành công!');
-      
-      // Navigate based on role
-      setTimeout(() => {
-        if (userData.role === 'ADMIN') {
-          window.location.href = '/dashboard';
-        } else if (userData.role === 'HR') {
-          window.location.href = '/candidates';
-        } else if (userData.role === 'EMPLOYEE') {
-          window.location.href = '/employee';
-        }
-      }, 100);
+      console.log('🔐 Database user logged in successfully');
       
     } catch (error: any) {
       console.error('Login error:', error);
-      try {
-        // If database login fails, still show helpful error
+      if (!error.message?.includes('User not found')) {
         toast.error('Email hoặc mật khẩu không đúng');
-      } catch (error) {
-        toast.error('Lỗi đăng nhập');
       }
       throw error;
     }
